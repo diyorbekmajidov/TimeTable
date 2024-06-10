@@ -27,8 +27,8 @@ class CustomUser(AbstractUser):
     username = None  # Remove the username field
     phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$', message="Telefon raqami '+9989999999' formatida kiritilishi kerak. 15 tagacha raqamga ruxsat beriladi.")
     phone_number = models.CharField(validators=[phone_regex], max_length=17, blank=True, unique=True) # Validators should be a list
-    first_name = models.CharField(max_length=30, blank=False)
-    last_name = models.CharField(max_length=30, blank=False)
+    first_name = models.CharField(max_length=30, blank=True, null=True)
+    last_name = models.CharField(max_length=30, blank=True, null=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(auto_now_add=True)
