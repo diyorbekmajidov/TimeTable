@@ -1,19 +1,20 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny,IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import (UserSerializer,UserLoginSerializer)
-from django.contrib.auth import authenticate
-from rest_framework.exceptions import AuthenticationFailed
 from django.contrib.auth.hashers import make_password
-from django.contrib.auth import get_user_model
+
+from rest_framework.decorators import api_view, permission_classes
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 
 class RegisterUser(APIView):
     permission_classes = (AllowAny,)
-    authentication_classes = (TokenAuthentication,)
+    @swagger_auto_schema(request_body=UserSerializer)
 
     def post(self, request):
         data = request.data
@@ -31,73 +32,54 @@ class RegisterUser(APIView):
 
 
 class UserLoginAPIView(APIView):
-	serializer_class = UserLoginSerializer
-	authentication_classes = (TokenAuthentication,)
-	permission_classes = (AllowAny,)
+    serializer_class = UserLoginSerializer
+    permission_classes = (AllowAny,)
 
-	def post(self, request):
-		phone_number = request.data.get('phone_number', None)
-		user_password = request.data.get('password', None)
-		if not user_password:
-			raise AuthenticationFailed('A user password is needed.')
-
-		if not phone_number:
-			raise AuthenticationFailed('An user email is needed.')
-
-		user_instance = authenticate(phone_number=phone_number, password=user_password)
-
-		if not user_instance:
-			raise AuthenticationFailed('User not found.')
-
-		if user_instance.is_active:
-			refresh =  RefreshToken.for_user(user_instance)
-			response = Response()
-			response.set_cookie(key='access_token', value=str(refresh.access_token), httponly=True)
-			response.data = {
-				'access_token': str(refresh.access_token)
-			}
-			return response
-
-		return Response({
-			'message': 'Something went wrong.'
-		})
-
-
-# class UserViewAPI(APIView):
-# 	authentication_classes = (TokenAuthentication,)
-# 	permission_classes = (AllowAny,)
-
-# 	def get(self, request):
-# 		user_token = request.COOKIES.get('access_token')
-
-# 		if not user_token:
-# 			raise AuthenticationFailed('Unauthenticated user.')
-
-# 		payload = jwt.decode(user_token, settings.SECRET_KEY, algorithms=['HS256'])
-
-# 		user_model = get_user_model()
-# 		user = user_model.objects.filter(user_id=payload['user_id']).first()
-# 		user_serializer = UserRegistrationSerializer(user)
-# 		return Response(user_serializer.data)
+    @swagger_auto_schema(request_body=UserLoginSerializer)
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+            refresh = RefreshToken.for_user(user)
+            response = Response()
+            response.set_cookie(key='access_token', value=str(refresh.access_token), httponly=True)
+            response.data = {
+                'access_token': str(refresh.access_token),
+                'refresh_token': str(refresh),
+            }
+            return response
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
-class UserLogoutViewAPI(APIView):
-	authentication_classes = (TokenAuthentication,)
-	permission_classes = (AllowAny,)
+class UserLogoutAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
 
-	def get(self, request):
-		user_token = request.COOKIES.get('access_token', None)
-		if user_token:
-			response = Response()
-			response.delete_cookie('access_token')
-			response.data = {
-				'message': 'Logged out successfully.'
-			}
-			return response
-		response = Response()
-		response.data = {
-			'message': 'User is already logged out.'
-		}
-		return response
+    @swagger_auto_schema(
+        manual_parameters=[openapi.Parameter('refresh_token', openapi.IN_QUERY, description="Refresh Token", type=openapi.TYPE_STRING)]
+    )
+    def post(self, request):
+        try:
+            refresh_token = request.data["refresh_token"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+
+            response = Response(status=status.HTTP_205_RESET_CONTENT)
+            response.delete_cookie('access_token')
+            return response
+        except Exception as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+     
+
+
+
+class GetUserAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+    @swagger_auto_schema(responses={200: UserSerializer})
+
+    def get(self, request):
+        user = request.user
+        serializer = UserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
             
