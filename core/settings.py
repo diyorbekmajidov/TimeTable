@@ -48,6 +48,11 @@ INSTALLED_APPS = [
     "User",
 ]
 
+CORS_ALLOWED_ORIGINS = [
+    "https://timetable1.pythonanywhere.com/",
+]
+
+
 CORS_ALLOW_ALL_ORIGINS = True
 
 MIDDLEWARE = [
