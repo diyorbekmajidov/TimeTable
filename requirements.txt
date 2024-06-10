@@ -1,0 +1,7 @@
+django == 4.1.2
+djangorestframework
+djangorestframework-simplejwt
+django-cors-headers
+Pillow
+drf-yasg
+requests
