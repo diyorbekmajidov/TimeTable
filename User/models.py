@@ -41,5 +41,13 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.phone_number
+    
+    def create_user(self, phone_number, password=None, **extra_fields):
+        if not phone_number:
+            raise ValueError('Telefon raqami kiritilishi shart')
+        user = self.model(phone_number=phone_number, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
 
     
