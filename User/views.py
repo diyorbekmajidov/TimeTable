@@ -18,7 +18,7 @@ class RegisterUser(APIView):
 
     def post(self, request):
         data = request.data
-        data['password'] = make_password(request.data['password'])
+        # data['password'] = make_password(request.data['password'])
         serializer = UserSerializer(data=data)
         if serializer.is_valid():
             user = serializer.save()
