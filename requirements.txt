@@ -5,4 +5,5 @@ django-phonenumber-field
 django-cors-headers
 Pillow
 drf-yasg
+django-jazzmin
 requests
