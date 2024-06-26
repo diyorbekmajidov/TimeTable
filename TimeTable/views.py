@@ -8,6 +8,7 @@ from drf_yasg import openapi
 from .serializers import ScienceSerializers, TeacherSerializers
 from .models import Science, Teacher
 
+
 class ScienceApiViews(APIView):
     authentication_classes = [JWTAuthentication] 
     permission_classes = [IsAuthenticated]
@@ -20,9 +21,9 @@ class ScienceApiViews(APIView):
             type=openapi.TYPE_OBJECT,
             properties={
                 'name': openapi.Schema(type=openapi.TYPE_STRING, description='Science name'),
-                'description': openapi.Schema(type=openapi.TYPE_STRING, description='Science description', required=False),
+                'description': openapi.Schema(type=openapi.TYPE_STRING, description='Science description'),
             },
-            required=['name']
+            required=['name'],  # Specify required fields as a list of property names
         ),
         responses={
             201: openapi.Response('Created', ScienceSerializers),
@@ -83,7 +84,7 @@ class TeacherApiView(APIView):
             properties={
                 'fullname': openapi.Schema(type=openapi.TYPE_STRING, description='Teacher full name'),
                 'science': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_INTEGER), description='List of science IDs'),
-                'description': openapi.Schema(type=openapi.TYPE_STRING, description='Teacher description', required=False),
+                'description': openapi.Schema(type=openapi.TYPE_STRING, description='Teacher description'),
             },
             required=['fullname', 'science']
         ),
