@@ -4,10 +4,10 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny,IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import (UserSerializer,UserLoginSerializer)
-from django.contrib.auth.hashers import make_password
 
-from rest_framework.decorators import api_view, permission_classes
+from .serializers import (UserSerializer,UserLoginSerializer)
+
+# from rest_framework.decorators import api_view, permission_classes
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
@@ -26,7 +26,7 @@ class RegisterUser(APIView):
                 refresh = RefreshToken.for_user(user)
                 data = {'refresh': str(refresh),'access': str(refresh.access_token)}
                 response = Response(data, status=status.HTTP_201_CREATED)
-                response.set_cookie(key='access_token', value=str(refresh.access_token))
+                # response.set_cookie(key='access_token', value=str(refresh.access_token))
                 return response
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -42,7 +42,7 @@ class UserLoginAPIView(APIView):
             user = serializer.validated_data['user']
             refresh = RefreshToken.for_user(user)
             response = Response()
-            response.set_cookie(key='access_token', value=str(refresh.access_token), httponly=True)
+            # response.set_cookie(key='access_token', value=str(refresh.access_token), httponly=True)
             response.data = {
                 'access_token': str(refresh.access_token),
                 'refresh_token': str(refresh),
