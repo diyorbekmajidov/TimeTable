@@ -5,8 +5,8 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from .serializers import ScienceSerializers, TeacherSerializers
-from .models import Science, Teacher
+from .serializers import ScienceSerializers, TeacherSerializers, ClassRoomSerializer
+from .models import Science, Teacher, ClassRoom
 
 
 class ScienceApiViews(APIView):
@@ -28,8 +28,10 @@ class ScienceApiViews(APIView):
         responses={
             201: openapi.Response('Created', ScienceSerializers),
             400: "Bad Request"
-        }
+        },
+        security=[{'Bearer': []}]  # Apply the security scheme
     )
+
     def post(self, request):
         serializers = ScienceSerializers(data=request.data)
         if serializers.is_valid():
@@ -131,3 +133,21 @@ class TeacherApiViewById(APIView):
             return Response(serializer.data)
         except Teacher.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+class ClassRoomApiView(APIView):
+    authentication_classes = [JWTAuthentication] 
+    permission_classes = [IsAuthenticated]
+    serializer_class = ClassRoomSerializer
+
+    def post(self, request):
+        serializer = ClassRoomSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def get(self, request):
+        science = ClassRoom.objects.all()
+        serializer = ScienceSerializers(science, many=True)
+        return Response(serializer.data)
+    

@@ -11,6 +11,9 @@ class TeacherSerializers(serializers.ModelSerializer):
     class Meta:
         model = Teacher
         fields = '__all__'
-        
 
+class ClassRoomSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ClassRoom
+        fields = ['name', 'semina', 'leader', 'sciences']
 

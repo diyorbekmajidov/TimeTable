@@ -11,3 +11,4 @@ class ClassRoomAdmin(admin.ModelAdmin):
 admin.site.register(Science)
 admin.site.register(Teacher)
 admin.site.register(ClassRoom, ClassRoomAdmin)
+admin.site.register(ClassRoomScience)
