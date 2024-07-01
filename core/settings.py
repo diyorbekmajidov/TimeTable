@@ -54,6 +54,7 @@ INSTALLED_APPS = [
 CORS_ALLOWED_ORIGINS = [
     "https://timetable1.pythonanywhere.com",
     "http://localhost:3000",
+    "https://electronic-class-schedule.vercel.app"
 ]
 
 
