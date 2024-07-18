@@ -2,6 +2,7 @@ from django.db import models
 
 class Science(models.Model):
     name = models.CharField(max_length=45, blank=False)
+    is_group = models.BooleanField(default=False, blank=True)
     description = models.CharField(max_length=255, blank=True, null=True)
     date_create = models.DateTimeField(auto_now_add=True)
     date_update = models.DateTimeField(auto_now=True)
@@ -10,6 +11,7 @@ class Science(models.Model):
         return self.name
 
 class Teacher(models.Model):
+    # o'qtuvchi yaratish
     fullname = models.CharField(max_length=60)
     sciences = models.ManyToManyField(Science, related_name="teachers")
     description = models.CharField(max_length=255, blank=True, null=True)
@@ -20,6 +22,7 @@ class Teacher(models.Model):
         return self.fullname
 
 class ClassRoom(models.Model):
+    # sinf qo'shish va unga birdan fanlar birik terish
     SEMINA_CHOICES = [
         ('1', "Tushlikgacha"),
         ('2', "Tushlikdan so'ng")
@@ -28,7 +31,7 @@ class ClassRoom(models.Model):
     name = models.CharField(max_length=45)
     semina = models.CharField(max_length=50, choices=SEMINA_CHOICES)
     leader = models.OneToOneField(Teacher, on_delete=models.CASCADE)
-    sciences = models.ManyToManyField(Science, through='ClassRoomScience', related_name="classes")
+    # sciences = models.ManyToManyField(Science, through='ClassRoomScience', related_name="classes")
     description = models.CharField(max_length=255, blank=True, null=True)
     date_create = models.DateTimeField(auto_now_add=True)
     date_update = models.DateTimeField(auto_now=True)
@@ -38,9 +41,13 @@ class ClassRoom(models.Model):
     
 
 class ClassRoomScience(models.Model):
+    # yaratilgan sinfga fan birik terish va usha fanaga o'qtuvchi ham berikterish
     classroom = models.ForeignKey(ClassRoom, on_delete=models.CASCADE)
     science = models.ForeignKey(Science, on_delete=models.CASCADE)
     times_per_week = models.PositiveIntegerField()
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    date_create = models.DateTimeField(auto_now_add=True)
+    date_update = models.DateTimeField(auto_now=True)
 
     class Meta:
         unique_together = ('classroom', 'science')

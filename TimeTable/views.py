@@ -21,6 +21,7 @@ class ScienceApiViews(APIView):
             type=openapi.TYPE_OBJECT,
             properties={
                 'name': openapi.Schema(type=openapi.TYPE_STRING, description='Science name'),
+                'is_group' : openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Science is group'),
                 'description': openapi.Schema(type=openapi.TYPE_STRING, description='Science description'),
             },
             required=['name'],  # Specify required fields as a list of property names
