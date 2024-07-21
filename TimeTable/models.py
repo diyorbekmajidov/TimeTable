@@ -9,17 +9,32 @@ class Science(models.Model):
 
     def __str__(self) -> str:
         return self.name
+    
+from django.db import models
 
 class Teacher(models.Model):
-    # o'qtuvchi yaratish
+    DAY_CHOICES = [
+        ('Monday', 'Monday'),
+        ('Tuesday', 'Tuesday'),
+        ('Wednesday', 'Wednesday'),
+        ('Thursday', 'Thursday'),
+        ('Friday', 'Friday'),
+        ('Saturday', 'Saturday'),
+    ]
+
     fullname = models.CharField(max_length=60)
-    sciences = models.ManyToManyField(Science, related_name="teachers")
+    sciences = models.ManyToManyField('Science', related_name="teachers")
+    workdays = models.CharField(max_length=255)  # Store as a comma-separated string
     description = models.CharField(max_length=255, blank=True, null=True)
     date_create = models.DateTimeField(auto_now_add=True)
     date_update = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
         return self.fullname
+
+    def get_workdays(self):
+        return self.workdays.split(',')
+
 
 class ClassRoom(models.Model):
     # sinf qo'shish va unga birdan fanlar birik terish

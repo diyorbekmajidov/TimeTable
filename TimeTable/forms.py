@@ -1,30 +1,49 @@
 from django import forms
-from .models import ClassRoomScience, Teacher
+from django.contrib import admin
+from .models import Teacher
 
-class ClassRoomScienceForm(forms.ModelForm):
+class TeacherAdminForm(forms.ModelForm):
+    workdays = forms.MultipleChoiceField(
+        choices=Teacher.DAY_CHOICES,
+        widget=forms.CheckboxSelectMultiple
+    )
+
     class Meta:
-        model = ClassRoomScience
-        fields = ['science', 'teacher', 'times_per_week']
+        model = Teacher
+        fields = ['fullname', 'sciences', 'workdays', 'description']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if 'science' in self.data:
-            try:
-                science_id = int(self.data.get('science'))
-                self.fields['teacher'].queryset = Teacher.objects.filter(sciences__id=science_id)
-            except (ValueError, TypeError):
-                pass  # invalid input from the client; ignore and fallback to empty teacher queryset
-        elif self.instance.pk:
-            self.fields['teacher'].queryset = self.instance.science.teachers
-        else:
-            self.fields['teacher'].queryset = Teacher.objects.none()
+        if self.instance and self.instance.pk:
+            self.fields['workdays'].initial = self.instance.get_workdays()
 
-    def clean(self):
-        cleaned_data = super().clean()
-        science = cleaned_data.get('science')
-        teacher = cleaned_data.get('teacher')
+    def save(self, commit=True):
+        teacher = super().save(commit=False)
+        teacher.workdays = ','.join(self.cleaned_data['workdays'])
+        if commit:
+            teacher.save()
+            self.save_m2m()
+        return teacher
+    
 
-        if science and teacher and not teacher.sciences.filter(id=science.id).exists():
-            self.add_error('teacher', f'Teacher {teacher.fullname} does not teach {science.name}')
-        
-        return cleaned_data
+from django import forms
+from .models import Teacher
+
+class TeacherForm(forms.ModelForm):
+    workdays = forms.MultipleChoiceField(
+        choices=Teacher.DAY_CHOICES,
+        widget=forms.CheckboxSelectMultiple
+    )
+
+    class Meta:
+        model = Teacher
+        fields = ['fullname', 'sciences', 'workdays', 'description']
+
+    def save(self, commit=True):
+        teacher = super().save(commit=False)
+        teacher.workdays = ','.join(self.cleaned_data['workdays'])
+        if commit:
+            teacher.save()
+            self.save_m2m()
+        return teacher
+

@@ -7,10 +7,21 @@ class ScienceSerializers(serializers.ModelSerializer):
         model = Science
         fields = '__all__'
 
-class TeacherSerializers(serializers.ModelSerializer):
+class WorkdayField(serializers.Field):
+    def to_representation(self, value):
+        return value.split(',')
+
+    def to_internal_value(self, data):
+        if isinstance(data, list):
+            return ','.join(data)
+        raise serializers.ValidationError("Expected a list of strings.")
+
+class TeacherSerializer(serializers.ModelSerializer):
+    workdays = WorkdayField()
+
     class Meta:
         model = Teacher
-        fields = '__all__'
+        fields = ['fullname', 'sciences', 'workdays', 'description']
 
 class ClassRoomScienceSerializer(serializers.ModelSerializer):
     class Meta:

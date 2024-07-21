@@ -5,8 +5,11 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from .serializers import ScienceSerializers, TeacherSerializers, ClassRoomSerializer
+from .serializers import ScienceSerializers, TeacherSerializer, ClassRoomSerializer
 from .models import Science, Teacher, ClassRoom
+from django.shortcuts import render, redirect
+from .models import Teacher
+from .forms import TeacherForm
 
 
 class ScienceApiViews(APIView):
@@ -77,60 +80,45 @@ class ScienceApiviewById(APIView):
 class TeacherApiView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
-    serializer_class = TeacherSerializers
+    serializer_class = TeacherSerializer
     queryset = Teacher.objects.all()
 
     @swagger_auto_schema(
-        operation_summary="Create a new teacher entry",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'fullname': openapi.Schema(type=openapi.TYPE_STRING, description='Teacher full name'),
-                'science': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_INTEGER), description='List of science IDs'),
-                'description': openapi.Schema(type=openapi.TYPE_STRING, description='Teacher description'),
-            },
-            required=['fullname', 'science']
-        ),
+        operation_summary="Creat a new teacher here",
         responses={
-            201: openapi.Response('Created', TeacherSerializers),
-            400: "Bad Request"
+            200: openapi.Response('OK', TeacherSerializer),
+            404: "Not Found"
         }
     )
-    def post(self, request):
-        serializers = TeacherSerializers(data=request.data)
-        if serializers.is_valid():
-            serializers.save()
-            return Response(serializers.data, status=status.HTTP_201_CREATED)
-        return Response(serializers.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    @swagger_auto_schema(
-        operation_summary="List all teachers",
-        responses={
-            200: openapi.Response('OK', TeacherSerializers(many=True)),
-        }
-    )
+    def post(self,request):
+        serializer = TeacherSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+  
     def get(self, request):
         teacher = Teacher.objects.all()
-        serializer = TeacherSerializers(teacher, many=True)
+        serializer = TeacherSerializer(teacher, many=True)
         return Response(serializer.data)
     
 class TeacherApiViewById(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
-    serializer_class = TeacherSerializers
+    serializer_class = TeacherSerializer
     queryset = Teacher.objects.all()
 
     @swagger_auto_schema(
         operation_summary="Retrieve a teacher by ID",
         responses={
-            200: openapi.Response('OK', TeacherSerializers),
+            200: openapi.Response('OK', TeacherSerializer),
             404: "Not Found"
         }
     )
     def get(self, request, pk):
         try:
             teacher = Teacher.objects.get(id=pk)
-            serializer = TeacherSerializers(teacher)
+            serializer = TeacherSerializer(teacher)
             return Response(serializer.data)
         except Teacher.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
