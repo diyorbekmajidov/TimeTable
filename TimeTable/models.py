@@ -1,11 +1,14 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 class Science(models.Model):
-    name = models.CharField(max_length=45, blank=False)
-    is_group = models.BooleanField(default=False, blank=True)
-    description = models.CharField(max_length=255, blank=True, null=True)
+    name = models.CharField(max_length=45, blank=False, verbose_name=_('name'))
+    is_group = models.BooleanField(default=False, blank=True, verbose_name=_('is_group'))
+    description = models.CharField(max_length=255, blank=True, null=True, verbose_name=_('description'))
     date_create = models.DateTimeField(auto_now_add=True)
     date_update = models.DateTimeField(auto_now=True)
+
+    VERBOSE_NAME = _('Science')
 
     def __str__(self) -> str:
         return self.name
@@ -22,12 +25,14 @@ class Teacher(models.Model):
         ('Saturday', 'Saturday'),
     ]
 
-    fullname = models.CharField(max_length=60)
-    sciences = models.ManyToManyField('Science', related_name="teachers")
-    workdays = models.CharField(max_length=255)  # Store as a comma-separated string
-    description = models.CharField(max_length=255, blank=True, null=True)
+    fullname = models.CharField(max_length=60, verbose_name=_('fullname'))
+    sciences = models.ManyToManyField('Science', related_name="teachers", verbose_name=_('sciences'))
+    workdays = models.CharField(max_length=255, verbose_name=_('workdays'))  # Store as a comma-separated string
+    description = models.CharField(max_length=255, blank=True, null=True, verbose_name=_('description'))
     date_create = models.DateTimeField(auto_now_add=True)
     date_update = models.DateTimeField(auto_now=True)
+
+    VERBOSE_NAME = _('Teacher')
 
     def __str__(self) -> str:
         return self.fullname
@@ -43,13 +48,15 @@ class ClassRoom(models.Model):
         ('2', "Tushlikdan so'ng")
     ]
 
-    name = models.CharField(max_length=45)
-    semina = models.CharField(max_length=50, choices=SEMINA_CHOICES)
+    name = models.CharField(max_length=45, verbose_name=_('name'))
+    semina = models.CharField(max_length=50, choices=SEMINA_CHOICES, verbose_name=_('semina'))
     leader = models.OneToOneField(Teacher, on_delete=models.CASCADE)
     # sciences = models.ManyToManyField(Science, through='ClassRoomScience', related_name="classes")
-    description = models.CharField(max_length=255, blank=True, null=True)
+    description = models.CharField(max_length=255, blank=True, null=True, verbose_name=_('description'))
     date_create = models.DateTimeField(auto_now_add=True)
     date_update = models.DateTimeField(auto_now=True)
+
+    VERBOSE_NAME = _('ClassRoom')
 
     def __str__(self) -> str:
         return self.name
@@ -57,12 +64,15 @@ class ClassRoom(models.Model):
 
 class ClassRoomScience(models.Model):
     # yaratilgan sinfga fan birik terish va usha fanaga o'qtuvchi ham berikterish
-    classroom = models.ForeignKey(ClassRoom, on_delete=models.CASCADE)
-    science = models.ForeignKey(Science, on_delete=models.CASCADE)
-    times_per_week = models.PositiveIntegerField()
-    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    classroom = models.ForeignKey(ClassRoom, on_delete=models.CASCADE, verbose_name=_('classroom'))
+    science = models.ForeignKey(Science, on_delete=models.CASCADE, verbose_name=_('science'))
+    times_per_week = models.PositiveIntegerField(verbose_name=_('times_per_week'))
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, verbose_name=_('teacher'))
+    teacher2 = models.ForeignKey(Teacher, null=True, blank=True, on_delete=models.SET_NULL, related_name='teacher2', verbose_name=_('teacher2'))
     date_create = models.DateTimeField(auto_now_add=True)
     date_update = models.DateTimeField(auto_now=True)
+
+    VERBOSE_NAME = _('ClassRoomScience')
 
     class Meta:
         unique_together = ('classroom', 'science')

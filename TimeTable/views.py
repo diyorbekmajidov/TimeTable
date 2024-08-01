@@ -1,5 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.http import JsonResponse
 from rest_framework import status
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -9,7 +10,19 @@ from .serializers import ScienceSerializers, TeacherSerializer, ClassRoomSeriali
 from .models import Science, Teacher, ClassRoom
 from django.shortcuts import render, redirect
 from .models import Teacher
-from .forms import TeacherForm
+
+
+from django.views import View
+
+class ScienceIsGroup(View):
+    def get(self, request):
+        science_id = request.GET.get('id')
+        try:
+            science = Science.objects.get(pk=science_id)
+            is_group = science.is_group
+            return JsonResponse({'is_group': is_group})
+        except Science.DoesNotExist:
+            return JsonResponse({'error': 'Science not found'}, status=404)
 
 
 class ScienceApiViews(APIView):

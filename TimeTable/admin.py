@@ -19,6 +19,12 @@ class TeacherAdmin(admin.ModelAdmin):
 class ClassRoomAdmin(admin.ModelAdmin):
     inlines = [ClassRoomScienceInline]
 
+    class Media:
+        js = (
+            "js/group.js",
+            "https://code.jquery.com/jquery-3.3.1.min.js",
+        )
+
 admin.site.register(ClassRoom, ClassRoomAdmin)
 admin.site.register(Science)
 admin.site.register(Teacher, TeacherAdmin)
