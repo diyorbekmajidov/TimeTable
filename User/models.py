@@ -7,7 +7,7 @@ class CustomUserManager(BaseUserManager):
     def create_user(self, phone_number, password=None, **extra_fields):
         if not phone_number:
             raise ValueError('The Phone Number field must be set')
-        phone_number = self.normalize_email(phone_number, verbose_name=_('phone_number'))
+        phone_number = self.normalize_email(phone_number)
         user = self.model(phone_number=phone_number, **extra_fields, verbose_name=_('user'))
         user.set_password(password)
         user.save(using=self._db)
